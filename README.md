@@ -1,36 +1,36 @@
 # KarateTesting
 
-Framework de pruebas de API automatizadas usando **Karate** (con motor Cucumber/BDD integrado), **JUnit 5** y **Maven**.
+Automated API testing framework using **Karate** (with built-in Cucumber/BDD engine), **JUnit 5**, and **Maven**.
 
 ---
 
-## Tecnologías
+## Technologies
 
-| Tecnología | Versión | Rol |
+| Technology | Version | Role |
 |---|---|---|
-| Java | 25 | Lenguaje base |
-| Maven | 3.x | Gestión de dependencias y build |
-| Karate | 1.4.1 | Framework BDD para pruebas de API |
-| JUnit 5 | 5.10.2 | Runner de pruebas |
+| Java | 25 | Base language |
+| Maven | 3.x | Dependency management and build |
+| Karate | 1.4.1 | BDD framework for API testing |
+| JUnit 5 | 5.10.2 | Test runner |
 
-> Karate incluye el motor de Cucumber internamente — no requiere dependencia adicional de Cucumber.
-
----
-
-## Patrón de Diseño: Modular por Dominio
-
-El proyecto sigue una arquitectura **modular organizada por dominio de negocio**, aprovechando las capacidades nativas de Karate para llamadas entre features y configuración centralizada.
-
-### Ventajas del patrón
-- **Sin clases Java extra** — toda la lógica vive en `.feature` y `.js`
-- **Reutilización nativa** — los features comunes se invocan con `call read()`
-- **Configuración por ambiente** — `karate-config.js` centraliza URLs y parámetros
-- **Datos desacoplados** — archivos JSON/CSV separados del flujo de prueba
-- **Escalable** — agregar un dominio nuevo = nueva carpeta, sin tocar lo existente
+> Karate includes the Cucumber engine internally — no additional Cucumber dependency is required.
 
 ---
 
-## Estructura del Proyecto
+## Design Pattern: Domain-Based Modular
+
+The project follows a **modular architecture organized by business domain**, leveraging Karate's native capabilities for feature-to-feature calls and centralized configuration.
+
+### Pattern advantages
+- **No extra Java classes** — all logic lives in `.feature` and `.js` files
+- **Native reusability** — common features are invoked with `call read()`
+- **Environment-based config** — `karate-config.js` centralizes URLs and parameters
+- **Decoupled test data** — JSON/CSV files separated from test flow
+- **Scalable** — adding a new domain = new folder, no changes to existing code
+
+---
+
+## Project Structure
 
 ```
 KarateTesting/
@@ -41,27 +41,27 @@ KarateTesting/
         │   └── runner/
         │       └── TestRunner.java          # JUnit 5 runner
         └── resources/
-            ├── karate-config.js             # Configuración por ambiente
+            ├── karate-config.js             # Environment configuration
             ├── common/
-            │   ├── auth.feature             # Autenticación reutilizable
-            │   └── helpers.js               # Funciones utilitarias JS
+            │   ├── auth.feature             # Reusable authentication
+            │   └── helpers.js               # Shared JS utility functions
             ├── users/
-            │   ├── users.feature            # Tests del dominio Users
+            │   ├── users.feature            # Users domain tests
             │   └── data/
-            │       └── users-data.json      # Datos de prueba
+            │       └── users-data.json      # Test data
             └── orders/
-                ├── orders.feature           # Tests del dominio Orders
+                ├── orders.feature           # Orders domain tests
                 └── data/
-                    └── orders-data.json     # Datos de prueba
+                    └── orders-data.json     # Test data
 ```
 
 ---
 
-## Configuración de Ambientes
+## Environment Configuration
 
-El ambiente se controla con la variable `karate.env`. Por defecto usa `dev`.
+The environment is controlled with the `karate.env` variable. Defaults to `dev`.
 
-| Ambiente | URL Base |
+| Environment | Base URL |
 |---|---|
 | `dev` | `https://jsonplaceholder.typicode.com` |
 | `qa` | `https://qa.api.example.com` |
@@ -69,65 +69,65 @@ El ambiente se controla con la variable `karate.env`. Por defecto usa `dev`.
 
 ---
 
-## Ejecución de Pruebas
+## Running Tests
 
-### Todos los tests
+### All tests
 ```bash
 mvn test
 ```
 
-### Por ambiente
+### By environment
 ```bash
 mvn test -Dkarate.env=qa
 mvn test -Dkarate.env=prod
 ```
 
-### Por tag
+### By tag
 ```bash
-# Solo pruebas de humo
+# Smoke tests only
 mvn test -Dkarate.options="--tags @smoke"
 
-# Solo pruebas de regresión
+# Regression tests only
 mvn test -Dkarate.options="--tags @regression"
 ```
 
-### Por dominio (desde el runner)
-Modificar `TestRunner.java` para ejecutar `testUsers()` o `testOrders()` individualmente.
+### By domain (from the runner)
+Modify `TestRunner.java` to run `testUsers()` or `testOrders()` individually.
 
 ---
 
-## Tags disponibles
+## Available Tags
 
-| Tag | Descripción |
+| Tag | Description |
 |---|---|
-| `@smoke` | Pruebas críticas de validación rápida |
-| `@regression` | Suite completa de regresión |
-| `@ignore` | Features utilitarios (no se ejecutan directamente) |
+| `@smoke` | Critical fast-validation tests |
+| `@regression` | Full regression suite |
+| `@ignore` | Utility features (not executed directly) |
 
 ---
 
-## Reportes
+## Reports
 
-Karate genera reportes HTML automáticamente en:
+Karate automatically generates HTML reports at:
 ```
 target/karate-reports/karate-summary.html
 ```
 
 ---
 
-## Agregar un nuevo dominio
+## Adding a New Domain
 
-1. Crear carpeta `src/test/resources/<dominio>/`
-2. Crear `<dominio>.feature` con los escenarios
-3. Crear `data/<dominio>-data.json` con los datos de prueba
-4. Agregar el método en `TestRunner.java` si se necesita runner específico
+1. Create folder `src/test/resources/<domain>/`
+2. Create `<domain>.feature` with the scenarios
+3. Create `data/<domain>-data.json` with the test data
+4. Add the method in `TestRunner.java` if a specific runner is needed
 
 ---
 
-## Reutilizar autenticación
+## Reusing Authentication
 
 ```gherkin
-Scenario: Endpoint protegido
+Scenario: Protected endpoint
   * def auth = call read('../common/auth.feature') { username: 'user', password: 'pass' }
   Given url baseUrl + '/secure-endpoint'
   And header Authorization = 'Bearer ' + auth.authToken
